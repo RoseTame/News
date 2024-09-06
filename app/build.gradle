@@ -1,0 +1,54 @@
+plugins {
+    alias(libs.plugins.android.application)
+}
+
+android {
+    namespace 'com.newsultimate'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.newsultimate"
+        minSdk 29
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+}
+
+dependencies {
+
+    implementation libs.appcompat
+    implementation libs.material
+    implementation libs.activity
+    implementation libs.constraintlayout
+    testImplementation libs.junit
+    androidTestImplementation libs.ext.junit
+    androidTestImplementation libs.espresso.core
+
+    implementation 'com.squareup.picasso:picasso:2.8'
+
+    implementation 'com.alibaba.fastjson2:fastjson2:2.0.52'
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
+    testCompileOnly 'org.projectlombok:lombok:1.18.34'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+    implementation 'org.jsoup:jsoup:1.18.1'
+
+    implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'com.google.android.material:material:1.9.0'
+}

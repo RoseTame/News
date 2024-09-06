@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomTabLayout" parent="Widget.MaterialComponents.TabLayout">
+        <item name="tabTextAppearance">@style/CustomTabTextAppearance</item>
+        <item name="tabMaxWidth">0dp</item>
+    </style>
+
+    <style name="CustomTabTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="android:textSize">18sp</item> <!-- 设置字体大小 -->
+    </style>
+</resources>
