@@ -1,11 +1,15 @@
 package com.newsultimate.util;
 
 import com.alibaba.fastjson2.JSON;
+import com.alibaba.fastjson2.JSONArray;
+import com.alibaba.fastjson2.JSONObject;
 import com.alibaba.fastjson2.TypeReference;
 import com.newsultimate.bean.News;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -47,6 +51,8 @@ public class CrawlerUtil {
                 return getStockNews();
             case "ART":
                 return getArtNews();
+            case "VIDEO":
+                return getVideo();
             default:
                 throw new IllegalArgumentException("Invalid category: " + category);
         }
@@ -235,7 +241,6 @@ public class CrawlerUtil {
                     }
             );
 
-            // 过滤掉没有时间字段的新闻对象，并替换URL中的'www'为'm'
             List<News> filteredList = new ArrayList<>();
             for (News news : list) {
                 if (news.getTime() != null && !news.getTime().isEmpty() &&
@@ -249,4 +254,85 @@ public class CrawlerUtil {
             return new ArrayList<>(); // 返回一个空的列表
         }
     }
+
+    public static List<News> getVideo() {
+        String[] urlList = {
+                "https://channel.chinanews.com.cn/video/cns/lm/rd-rd.shtml?&pager=0&pagenum=50&t=5_55",
+                "http://channel.chinanews.com.cn/video/cns/roll/0/4.shtml?&pager=0&pagenum=50&t=7_42",
+        };
+
+        List<News> allNews = new ArrayList<>();
+        OkHttpClient client = new OkHttpClient().newBuilder().build();
+
+        for (String url : urlList) {
+            String json = "";
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader("User-Agent", USER_AGENT)
+                    .build();
+            try {
+                Response response = client.newCall(request).execute();
+                json = response.body().string();
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue; // 跳过当前 URL，继续处理下一个
+            }
+
+            // 提取 JSON 字符串
+            String jsonString = "";
+            try {
+                // 找到 JSON 对象的开始位置
+                int startIndex = json.indexOf("specialcnsdata = ");
+
+                // 检查 startIndex 是否找到
+                if (startIndex == -1) {
+                    throw new IllegalArgumentException("JSON 数据的开始位置未找到");
+                }
+
+                startIndex += "specialcnsdata = ".length();
+
+                // 找到 JSON 对象的结束位置
+                int endIndex = json.indexOf(";" + '\n' + "newslist = specialcnsdata", startIndex);
+
+                // 检查 endIndex 是否找到
+                if (endIndex == -1) {
+                    throw new IllegalArgumentException("JSON 数据的结束位置未找到");
+                }
+
+                // 提取 JSON 字符串
+                jsonString = json.substring(startIndex, endIndex);
+                jsonString = jsonString.trim();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                continue; // 跳过当前 URL，继续处理下一个
+            }
+
+            // 解析 JSON 字符串
+            try {
+                // 解析为 JSONObject
+                JSONObject jsonObject = JSON.parseObject(jsonString);
+                // 获取 "docs" 数组
+                JSONArray docsArray = jsonObject.getJSONArray("docs");
+                // 将 "docs" 数组解析为 List<News>
+                List<News> list = JSON.parseArray(docsArray.toJSONString(), News.class);
+                for (News news : list) {
+                    news.setCategory("VIDEO");
+                    String time = news.getTime();
+                    SimpleDateFormat originalFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                    SimpleDateFormat targetFormat = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
+
+                    Date original = originalFormat.parse(time);
+                    String target = targetFormat.format(original);
+                    news.setTime(target);
+                }
+                allNews.addAll(list);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        return allNews;
+    }
+
 }

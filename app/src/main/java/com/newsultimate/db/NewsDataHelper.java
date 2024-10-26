@@ -60,34 +60,6 @@ public class NewsDataHelper extends SQLiteOpenHelper {
 
     }
 
-    // 改进 insert 方法
-    public String insert(News news) {
-        ContentValues cv = new ContentValues();
-        cv.put(COLUMN_URL, news.getUrl());
-        cv.put(COLUMN_TITLE, news.getTitle());
-        cv.put(COLUMN_IMAGE_URL, news.getImageUrl());
-        cv.put(COLUMN_TIME, news.getTime());
-        cv.put(COLUMN_CATEGORY, news.getCategory());
-
-        SQLiteDatabase db = this.getWritableDatabase();
-        long result = -1;
-
-        try {
-            db.beginTransaction();
-            result = db.insert(TABLE_NAME, null, cv);
-            db.setTransactionSuccessful();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "FAIL: " + e.getMessage();
-        } finally {
-            db.endTransaction();
-            db.close();
-        }
-
-        return result == -1 ? "FAIL" : "SUCCESS";
-    }
-
-    // 改进 insertList 方法
     public String insertList(List<News> list) {
         SQLiteDatabase db = this.getWritableDatabase();
         int batchSize = 1000;
@@ -166,7 +138,7 @@ public class NewsDataHelper extends SQLiteOpenHelper {
             List<Future<List<News>>> futures = new ArrayList<>();
 
             List<String> categoryList = Arrays.asList(
-                    "HOT", "DOMESTIC", "FOREIGN", "MILITARY", "SPORTS",
+                    "HOT", "VIDEO", "DOMESTIC", "FOREIGN", "MILITARY", "SPORTS",
                     "TECHNOLOGY", "FINANCE", "EDUCATION", "CULTURE", "GAME",
                     "ENTERTAINMENT", "DIGITAL", "STOCK", "ART"
             );
@@ -205,10 +177,43 @@ public class NewsDataHelper extends SQLiteOpenHelper {
 
             // 在主线程中处理结果
             mainHandler.post(() -> {
-                Log.i("NewsDataHelper", "News saved to database.");
+                Log.i("NewsDataHelper", "news saved to database.");
             });
         }).start();
     }
+
+    public void saveToHistory(News news) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.beginTransaction();
+        try {
+            ContentValues cv = new ContentValues();
+            cv.put(COLUMN_URL, news.getUrl());
+            cv.put(COLUMN_TITLE, news.getTitle());
+            cv.put(COLUMN_IMAGE_URL, news.getImageUrl());
+            cv.put(COLUMN_TIME, news.getTime());
+            cv.put(COLUMN_CATEGORY, "HISTORY");  // 设置历史记录类别
+
+            try {
+                long result = db.insertOrThrow(TABLE_NAME, null, cv);
+                if (result == -1) {
+                    Log.w("NewsDataHelper", "Failed to insert history: " + news.getUrl());
+                }
+            } catch (SQLiteConstraintException e) {
+                // 忽略 UNIQUE 约束失败的插入
+                Log.w("NewsDataHelper", "Skipping duplicate history: " + news.getUrl());
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+            db.close();
+        }
+    }
+
+    public List<News> getHistory() {
+        return getNews("HISTORY");
+    }
+
 
     @SuppressLint("Range")
     public List<News> searchNews(String query) {
@@ -231,6 +236,10 @@ public class NewsDataHelper extends SQLiteOpenHelper {
         cursor.close();
         db.close();
         return resultList;
+    }
+
+    public boolean delete(Context context) {
+        return context.deleteDatabase(TABLE_NAME + ".db");
     }
 }
 

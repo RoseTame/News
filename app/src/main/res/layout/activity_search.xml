@@ -34,15 +34,6 @@
             android:iconifiedByDefault="false"
             app:queryHint="Search news" />
 
-        <ImageButton
-            android:id="@+id/btn_refresh"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="3dp"
-            android:background="@drawable/bg_logo_view"
-            android:padding="6dp"
-            android:src="@drawable/ic_refresh" />
-
     </LinearLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -15,12 +15,14 @@
         android:orientation="horizontal"
         android:padding="5dp">
 
-        <ImageView
+        <ImageButton
+            android:id="@+id/software_info"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="3dp"
             android:background="@drawable/bg_logo_view"
             android:padding="6dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/baseline_newspaper_24" />
 
         <androidx.appcompat.widget.SearchView
@@ -41,6 +43,7 @@
             android:layout_margin="3dp"
             android:background="@drawable/bg_logo_view"
             android:padding="6dp"
+            android:scaleType="centerCrop"
             android:src="@drawable/ic_refresh" />
 
 
