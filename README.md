@@ -1,6 +1,6 @@
 ## 安卓课程设计 News APP
 
-<img src="https://gitee.com/RoseTame/pic/raw/master/blog/202410262348093.png" width="290">
+<img src="https://gitee.com/RoseTame/pic/raw/master/blog/202410262348093.png" width="290px">
 
 | 开发工具         | 描述                      |
 | ---------------- | ------------------------- |
